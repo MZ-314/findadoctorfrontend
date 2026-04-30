@@ -28,8 +28,15 @@ export function LoginCard() {
         // Staff login uses username + password
         const res = await api.post("/auth/staff/login", { username, password });
         const { access_token } = res.data;
+        if (!access_token || typeof access_token !== "string") {
+          throw new Error("Login failed: missing access token.");
+        }
         // Decode basic info from token payload
-        const payload = JSON.parse(atob(access_token.split(".")[1]));
+        const tokenParts = access_token.split(".");
+        if (tokenParts.length < 2) {
+          throw new Error("Login failed: invalid access token.");
+        }
+        const payload = JSON.parse(atob(tokenParts[1]));
         login(
           {
             name: `Staff (${payload.city ?? "Unknown City"})`,
@@ -44,6 +51,9 @@ export function LoginCard() {
         // Patient / Doctor login
         const res = await api.post("/auth/login", { email, password });
         const { access_token } = res.data;
+        if (!access_token || typeof access_token !== "string") {
+          throw new Error("Login failed: missing access token.");
+        }
 
         // Fetch user profile to get name + role
         const meRes = await api.get("/auth/me", {
