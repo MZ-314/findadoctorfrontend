@@ -3,7 +3,7 @@ import { LoginPage } from "./pages/LoginPage";
 import { RegisterPage } from "./pages/RegisterPage";
 import { PatientPage } from "./pages/patient/PatientPage";
 import { PatientHome } from "./pages/patient/PatientHome";
-import { MyAppointments } from "./pages/patient/MyAppointments";
+import { MyAppointments } from "./pages/patient/myAppointments";
 import { MyEnquiries } from "./pages/patient/MyEnquiries";
 import { DoctorProfile } from "./pages/patient/DoctorProfile";
 
