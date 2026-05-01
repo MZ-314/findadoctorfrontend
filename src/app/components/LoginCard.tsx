@@ -56,9 +56,9 @@ export function LoginCard() {
         }
 
         // Fetch user profile to get name + role
-        const meRes = await api.get("/auth/me", {
-          headers: { Authorization: `Bearer ${access_token}` },
-        });
+        // Save token first so the interceptor picks it up
+        localStorage.setItem("token", access_token);
+        const meRes = await api.get("/auth/me");
         const me = meRes.data;
 
         login(
