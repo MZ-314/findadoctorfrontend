@@ -24,7 +24,6 @@ import { StaffOverview } from "./pages/staff/StaffOverview";
 import { StaffHospitals } from "./pages/staff/StaffHospitals";
 import { StaffDoctors } from "./pages/staff/StaffDoctors";
 import { useAuth } from "./context/AuthContext";
-import { Navigate } from "react-router";
 
 function RootRedirect() {
   const { user } = useAuth();
