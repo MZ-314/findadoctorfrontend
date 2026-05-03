@@ -60,7 +60,12 @@ export function Navbar({ links, activePath }: NavbarProps) {
       }}
     >
       {/* Logo */}
-      <Link to="/" style={{ display: "flex", alignItems: "center", gap: "9px", textDecoration: "none" }}>
+      <Link to={
+        user?.role === "patient" ? "/patient" :
+        user?.role === "doctor" ? "/doctor" :
+        user?.role === "hospital_admin" ? "/hospital" :
+        user?.role === "staff" ? "/staff" : "/"
+      } style={{ display: "flex", alignItems: "center", gap: "9px", textDecoration: "none" }}>
         <div style={{ width: "32px", height: "32px", borderRadius: "50%", background: "#ff4d4d", display: "flex", alignItems: "center", justifyContent: "center" }}>
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
             <rect x="6" y="1" width="4" height="14" rx="1.5" fill="white" />
