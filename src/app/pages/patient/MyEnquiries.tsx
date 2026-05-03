@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Stethoscope } from "lucide-react";
 import api, { getApiErrorMessage } from "../../api/axios";
 
 interface Enquiry {
@@ -7,13 +8,14 @@ interface Enquiry {
   reply?: string | null;
   status: string;
   created_at: string;
-  doctor?: {
-    user?: {
-      name?: string;
-    };
-    specialisation?: string;
-  };
+  doctor?: { user?: { name?: string }; specialisation?: string };
 }
+
+const STATUS_CONFIG: Record<string, { bg: string; text: string }> = {
+  open:     { bg: "#fffbeb", text: "#d97706" },
+  answered: { bg: "#f0fdf4", text: "#16a34a" },
+  closed:   { bg: "#f9fafb", text: "#6b7280" },
+};
 
 export function MyEnquiries() {
   const [enquiries, setEnquiries] = useState<Enquiry[]>([]);
@@ -21,59 +23,75 @@ export function MyEnquiries() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    const load = async () => {
-      setLoading(true);
-      setError("");
-      try {
-        const res = await api.get("/patient/enquiries");
-        setEnquiries(res.data ?? []);
-      } catch (err: any) {
-        setError(getApiErrorMessage(err, "Could not load enquiries."));
-      } finally {
-        setLoading(false);
-      }
-    };
-    load();
+    api.get("/patient/enquiries")
+      .then((r) => setEnquiries(r.data ?? []))
+      .catch((e) => setError(getApiErrorMessage(e)))
+      .finally(() => setLoading(false));
   }, []);
 
   return (
-    <main style={{ maxWidth: "1000px", margin: "0 auto", padding: "28px 24px 40px" }}>
-      <h1 style={{ fontSize: "24px", margin: "0 0 6px", color: "#111827" }}>My Enquiries</h1>
-      <p style={{ margin: "0 0 20px", color: "#6b7280" }}>Questions sent to doctors and their replies.</p>
+    <main style={{ maxWidth: "900px", margin: "0 auto", padding: "36px 40px 64px", fontFamily: "'Inter', sans-serif" }}>
+      <div style={{ marginBottom: "28px" }}>
+        <h1 style={{ fontWeight: 800, fontSize: "26px", color: "#111827", margin: "0 0 4px" }}>My Enquiries</h1>
+        <p style={{ fontSize: "14px", color: "#9ca3af", margin: 0 }}>Questions sent to doctors and their replies</p>
+      </div>
 
       {error && (
-        <div style={{ background: "#fef2f2", border: "1px solid #fecaca", color: "#b91c1c", borderRadius: "8px", padding: "10px 12px", marginBottom: "14px" }}>
+        <div style={{ background: "#fef2f2", border: "1.5px solid #fecaca", color: "#dc2626", borderRadius: "10px", padding: "10px 14px", marginBottom: "16px", fontSize: "13px", fontWeight: 500 }}>
           {error}
         </div>
       )}
 
       {loading ? (
-        <p style={{ color: "#6b7280" }}>Loading enquiries...</p>
+        <div style={centerStyle}>Loading enquiries…</div>
       ) : enquiries.length === 0 ? (
-        <p style={{ color: "#6b7280" }}>No enquiries yet.</p>
+        <div style={emptyStyle}>No enquiries yet. Send one from a doctor's profile.</div>
       ) : (
-        <div style={{ display: "grid", gap: "12px" }}>
-          {enquiries.map((enquiry) => (
-            <div key={enquiry.id} style={{ background: "#fff", border: "1px solid #e5e7eb", borderRadius: "10px", padding: "14px" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", gap: "10px", alignItems: "center" }}>
-                <div>
-                  <div style={{ fontWeight: 600, color: "#111827" }}>{enquiry.doctor?.user?.name ?? "Doctor"}</div>
-                  <div style={{ color: "#6b7280", fontSize: "14px" }}>{enquiry.doctor?.specialisation ?? "Specialist"}</div>
+        <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+          {enquiries.map((e) => {
+            const s = STATUS_CONFIG[e.status] ?? STATUS_CONFIG.open;
+            return (
+              <div key={e.id} style={cardStyle}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "10px" }}>
+                  <div>
+                    <div style={{ fontWeight: 700, fontSize: "15px", color: "#111827" }}>
+                      {e.doctor?.user?.name ?? "Doctor"}
+                    </div>
+                    <div style={{ fontSize: "13px", color: "#6b7280", display: "flex", alignItems: "center", gap: "5px", marginTop: "2px" }}>
+                      <Stethoscope size={12} /> {e.doctor?.specialisation ?? "Specialist"}
+                    </div>
+                  </div>
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "5px" }}>
+                    <span style={{ background: s.bg, color: s.text, fontSize: "11px", fontWeight: 600, padding: "3px 10px", borderRadius: "20px", textTransform: "capitalize" }}>
+                      {e.status}
+                    </span>
+                    <span style={{ fontSize: "11px", color: "#9ca3af" }}>
+                      {new Date(e.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+                    </span>
+                  </div>
                 </div>
-                <span style={{ fontSize: "12px", textTransform: "capitalize", background: "#f3f4f6", borderRadius: "999px", padding: "4px 10px", color: "#374151" }}>
-                  {enquiry.status}
-                </span>
+                <div style={{ padding: "10px 12px", background: "#f9fafb", borderRadius: "8px", fontSize: "14px", color: "#374151", lineHeight: 1.5, marginBottom: "10px" }}>
+                  {e.message}
+                </div>
+                {e.reply ? (
+                  <div style={{ padding: "10px 12px", background: "#f0fdf4", borderRadius: "8px", fontSize: "14px", color: "#16a34a", lineHeight: 1.5, borderLeft: "3px solid #86efac" }}>
+                    <strong style={{ display: "block", marginBottom: "3px", fontSize: "12px" }}>Doctor's Reply</strong>
+                    {e.reply}
+                  </div>
+                ) : (
+                  <div style={{ fontSize: "13px", color: "#9ca3af", fontStyle: "italic" }}>
+                    Awaiting reply…
+                  </div>
+                )}
               </div>
-              <div style={{ marginTop: "8px", color: "#111827", fontSize: "14px" }}>
-                <strong>Your message:</strong> {enquiry.message}
-              </div>
-              <div style={{ marginTop: "6px", color: "#6b7280", fontSize: "14px" }}>
-                <strong>Reply:</strong> {enquiry.reply || "No reply yet"}
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </main>
   );
 }
+
+const centerStyle: React.CSSProperties = { textAlign: "center", padding: "60px", color: "#9ca3af", fontSize: "14px" };
+const emptyStyle: React.CSSProperties = { textAlign: "center", padding: "60px", color: "#9ca3af", fontSize: "14px", background: "#ffffff", borderRadius: "16px", border: "1px solid #f3f4f6" };
+const cardStyle: React.CSSProperties = { background: "#ffffff", borderRadius: "16px", padding: "20px 22px", boxShadow: "0 1px 6px rgba(0,0,0,0.06)", border: "1px solid #f3f4f6" };
