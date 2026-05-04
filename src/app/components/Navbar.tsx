@@ -14,11 +14,14 @@ interface NavbarProps {
 }
 
 const ROLE_LABELS: Record<UserRole, string> = {
-  patient: "Patient Account",
-  doctor: "Doctor Account",
-  hospital_admin: "Hospital Admin",
-  staff: "Staff Account",
+  patient:       "Patient Account",
+  doctor:        "Doctor Account",
+  hospital_admin:"Hospital Admin",
+  staff:         "Staff Account",
 };
+
+const NAV  = "#0a2540";
+const TEAL = "#00b4d8";
 
 export function Navbar({ links, activePath }: NavbarProps) {
   const { user, logout } = useAuth();
@@ -43,36 +46,43 @@ export function Navbar({ links, activePath }: NavbarProps) {
 
   const currentPath = activePath ?? window.location.pathname;
 
+  const logoTo =
+    user?.role === "patient"       ? "/patient"  :
+    user?.role === "doctor"        ? "/doctor"   :
+    user?.role === "hospital_admin"? "/hospital" :
+    user?.role === "staff"         ? "/staff"    : "/";
+
   return (
-    <nav
-      style={{
-        height: "60px",
-        background: "#ffffff",
-        borderBottom: "1.5px solid #f0e0e0",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        padding: "0 60px",
-        position: "sticky",
-        top: 0,
-        zIndex: 50,
-        fontFamily: "'Inter', sans-serif",
-      }}
-    >
+    <nav style={{
+      height: "62px",
+      background: "#ffffff",
+      borderBottom: "1.5px solid #e2e8f0",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+      padding: "0 60px",
+      position: "sticky",
+      top: 0,
+      zIndex: 50,
+      fontFamily: "'Inter', sans-serif",
+    }}>
+
       {/* Logo */}
-      <Link to={
-        user?.role === "patient" ? "/patient" :
-        user?.role === "doctor" ? "/doctor" :
-        user?.role === "hospital_admin" ? "/hospital" :
-        user?.role === "staff" ? "/staff" : "/"
-      } style={{ display: "flex", alignItems: "center", gap: "9px", textDecoration: "none" }}>
-        <div style={{ width: "32px", height: "32px", borderRadius: "50%", background: "#ff4d4d", display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <rect x="6" y="1" width="4" height="14" rx="1.5" fill="white" />
-            <rect x="1" y="6" width="14" height="4" rx="1.5" fill="white" />
+      <Link to={logoTo} style={{ display: "flex", alignItems: "center", gap: "10px", textDecoration: "none" }}>
+        <div style={{ width: "34px", height: "34px", borderRadius: "9px", background: NAV, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+          <svg width="17" height="17" viewBox="0 0 17 17" fill="none">
+            <rect x="6" y="1" width="5" height="15" rx="1.5" fill={TEAL} />
+            <rect x="1" y="6" width="15" height="5" rx="1.5" fill="white" />
           </svg>
         </div>
-        <span style={{ color: "#ff4d4d", fontWeight: 700, fontSize: "18px", letterSpacing: "-0.4px" }}>FindADoctor</span>
+        <div>
+          <div style={{ fontWeight: 800, fontSize: "17px", color: NAV, letterSpacing: "-0.4px", lineHeight: 1 }}>
+            Docfolio
+          </div>
+          <div style={{ fontSize: "9px", color: "#64748b", fontWeight: 500, letterSpacing: "0.4px" }}>
+            by SETV Healthcare
+          </div>
+        </div>
       </Link>
 
       {/* Nav links */}
@@ -80,20 +90,25 @@ export function Navbar({ links, activePath }: NavbarProps) {
         {links.map(({ label, to }) => {
           const active = currentPath === to || currentPath.startsWith(to + "/");
           return (
-            <Link
-              key={to}
-              to={to}
+            <Link key={to} to={to}
               style={{
                 fontWeight: active ? 600 : 400,
                 fontSize: "14px",
-                color: active ? "#ff4d4d" : "#6b7280",
+                color: active ? TEAL : "#64748b",
                 textDecoration: "none",
                 transition: "color 0.15s",
+                position: "relative",
               }}
-              onMouseOver={(e) => ((e.target as HTMLElement).style.color = "#ff4d4d")}
-              onMouseOut={(e) => ((e.target as HTMLElement).style.color = active ? "#ff4d4d" : "#6b7280")}
+              onMouseOver={(e) => ((e.target as HTMLElement).style.color = TEAL)}
+              onMouseOut={(e) => ((e.target as HTMLElement).style.color = active ? TEAL : "#64748b")}
             >
               {label}
+              {active && (
+                <span style={{
+                  position: "absolute", bottom: "-21px", left: 0, right: 0,
+                  height: "2px", background: TEAL, borderRadius: "2px 2px 0 0",
+                }} />
+              )}
             </Link>
           );
         })}
@@ -101,38 +116,56 @@ export function Navbar({ links, activePath }: NavbarProps) {
 
       {/* Right side */}
       <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-        <button style={{ background: "none", border: "none", cursor: "pointer", padding: "6px", color: "#9ca3af", display: "flex", alignItems: "center", position: "relative" }}>
+        <button style={{ background: "none", border: "none", cursor: "pointer", padding: "6px", color: "#94a3b8", display: "flex", alignItems: "center", borderRadius: "8px", transition: "background 0.15s" }}
+          onMouseOver={(e) => ((e.currentTarget as HTMLButtonElement).style.background = "#f1f5f9")}
+          onMouseOut={(e) => ((e.currentTarget as HTMLButtonElement).style.background = "none")}
+        >
           <Bell size={20} strokeWidth={1.8} />
         </button>
 
         <div ref={dropdownRef} style={{ position: "relative" }}>
-          <div
-            onClick={() => setDropdownOpen((v) => !v)}
+          <div onClick={() => setDropdownOpen((v) => !v)}
             style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer", userSelect: "none" }}
           >
-            <div style={{ width: "36px", height: "36px", borderRadius: "50%", background: "#ff4d4d", display: "flex", alignItems: "center", justifyContent: "center", color: "#ffffff", fontWeight: 700, fontSize: "13px", flexShrink: 0 }}>
+            <div style={{
+              width: "36px", height: "36px", borderRadius: "50%", background: NAV,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              color: "#ffffff", fontWeight: 700, fontSize: "13px", flexShrink: 0,
+              border: "2px solid #e2e8f0",
+            }}>
               {user?.initials ?? "U"}
             </div>
-            <ChevronDown size={14} color="#9ca3af" />
+            <ChevronDown size={14} color="#94a3b8"
+              style={{ transform: dropdownOpen ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }}
+            />
           </div>
 
           {dropdownOpen && (
-            <div style={{ position: "absolute", top: "44px", right: 0, background: "#ffffff", borderRadius: "12px", boxShadow: "0 8px 32px rgba(0,0,0,0.12)", border: "1px solid #f3f4f6", minWidth: "200px", overflow: "hidden", zIndex: 100 }}>
-              <div style={{ padding: "14px 16px", borderBottom: "1px solid #f3f4f6" }}>
-                <div style={{ fontWeight: 600, fontSize: "14px", color: "#111827" }}>{user?.name}</div>
-                <div style={{ fontSize: "12px", color: "#9ca3af", marginTop: "2px" }}>{ROLE_LABELS[user?.role ?? "patient"]}</div>
+            <div style={{
+              position: "absolute", top: "48px", right: 0, background: "#ffffff",
+              borderRadius: "14px", boxShadow: "0 8px 32px rgba(10,37,64,0.14)",
+              border: "1px solid #e2e8f0", minWidth: "210px", overflow: "hidden", zIndex: 100,
+            }}>
+              {/* User info */}
+              <div style={{ padding: "14px 16px", borderBottom: "1px solid #f1f5f9", background: "#f8fafc" }}>
+                <div style={{ fontWeight: 700, fontSize: "14px", color: NAV }}>{user?.name}</div>
+                <div style={{ fontSize: "12px", color: "#94a3b8", marginTop: "2px" }}>
+                  {ROLE_LABELS[user?.role ?? "patient"]}
+                </div>
               </div>
-              <button
-                onClick={() => setDropdownOpen(false)}
-                style={{ width: "100%", background: "none", border: "none", padding: "11px 16px", display: "flex", alignItems: "center", gap: "9px", cursor: "pointer", fontSize: "14px", color: "#6b7280", fontFamily: "'Inter', sans-serif", fontWeight: 500, transition: "background 0.15s" }}
-                onMouseOver={(e) => ((e.currentTarget as HTMLButtonElement).style.background = "#f9fafb")}
+
+              {/* My Profile */}
+              <button onClick={() => setDropdownOpen(false)}
+                style={{ width: "100%", background: "none", border: "none", padding: "11px 16px", display: "flex", alignItems: "center", gap: "9px", cursor: "pointer", fontSize: "14px", color: "#374151", fontFamily: "'Inter', sans-serif", fontWeight: 500, transition: "background 0.15s" }}
+                onMouseOver={(e) => ((e.currentTarget as HTMLButtonElement).style.background = "#f8fafc")}
                 onMouseOut={(e) => ((e.currentTarget as HTMLButtonElement).style.background = "none")}
               >
-                <User size={15} color="#9ca3af" /> My Profile
+                <User size={15} color="#64748b" /> My Profile
               </button>
-              <button
-                onClick={handleLogout}
-                style={{ width: "100%", background: "none", border: "none", padding: "11px 16px", display: "flex", alignItems: "center", gap: "9px", cursor: "pointer", fontSize: "14px", color: "#ef4444", fontFamily: "'Inter', sans-serif", fontWeight: 500, borderTop: "1px solid #f3f4f6", transition: "background 0.15s" }}
+
+              {/* Logout */}
+              <button onClick={handleLogout}
+                style={{ width: "100%", background: "none", border: "none", padding: "11px 16px", display: "flex", alignItems: "center", gap: "9px", cursor: "pointer", fontSize: "14px", color: "#ef4444", fontFamily: "'Inter', sans-serif", fontWeight: 500, borderTop: "1px solid #f1f5f9", transition: "background 0.15s" }}
                 onMouseOver={(e) => ((e.currentTarget as HTMLButtonElement).style.background = "#fef2f2")}
                 onMouseOut={(e) => ((e.currentTarget as HTMLButtonElement).style.background = "none")}
               >
